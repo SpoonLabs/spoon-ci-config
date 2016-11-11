@@ -1,0 +1,401 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>TYPE</name>
+          <description>You can make a &quot;major&quot;, &quot;minor&quot; or &quot;patch&quot; release.
+
+/!\ If you make a patch release, think to update manually the master branch with the stable branch.</description>
+          <defaultValue>minor</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.25">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <assignedNode>sos-builder1</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+#
+# Deploys a new release of Spoon. This script uses the maven
+# release plugin to deploy the project or rollback if we got any
+# error during the deployment.
+# Note that this script doesn&apos;t make the git clone. Think to do it by yourself
+# or to execute this script in a Spoon repository.
+
+USER_SERVER=&quot;spoon-bot&quot;
+SERVER=&quot;${USER_SERVER}@scm.gforge.inria.fr&quot;
+HOST_DESTINATION=&quot;/home/groups/spoon/&quot;
+FOLDER_DESTINATION=&quot;spoon.git&quot;
+DESTINATION=&quot;${HOST_DESTINATION}${FOLDER_DESTINATION}/&quot;
+
+# Determine the type.
+
+MAJOR=0
+MINOR=1
+PATCH=2
+TYPES=(&apos;major&apos; &apos;minor&apos; &apos;patch&apos;)
+if [ -z &quot;$TYPE&quot; ]; then
+	TYPE=&apos;minor&apos;
+fi
+if ! [[ ${TYPES[*]} =~ &quot;$TYPE&quot; ]]; then
+	echo &quot;Error: type should be &apos;major&apos;, &apos;minor&apos; or &apos;patch&apos;!&quot;
+	exit 1
+fi
+if [[ ${TYPES[$PATCH]} = $TYPE ]]; then
+	git checkout stable
+fi
+
+# Save the current release version.
+
+RELEASE_TEXT=$(grep &quot;^spoon_release:&quot; doc/_jekyll/_config.yml | cut -d&apos; &apos; -f2-)
+REGEX=&quot;^\&quot;([0-9]+).([0-9]+).([0-9]+)\&quot;$&quot;
+if [[ $RELEASE_TEXT =~ $REGEX ]]; then
+	RVERSIONS[0]=&quot;${BASH_REMATCH[1]}&quot;
+	RVERSIONS[1]=&quot;${BASH_REMATCH[2]}&quot;
+	RVERSIONS[2]=&quot;${BASH_REMATCH[3]}&quot;
+else
+	echo &quot;Error: Can&apos;t get the last release version from jekyll config file.&quot;
+	exit 1
+fi
+
+# Save the next version.
+
+if [[ ${TYPES[$MAJOR]} = $TYPE ]]; then
+	NSVERSIONS[0]=$((RVERSIONS[0] + 1))
+	NSVERSIONS[1]=1
+	NSVERSIONS[2]=0
+	NRVERSIONS[0]=$((RVERSIONS[0] + 1))
+	NRVERSIONS[1]=0
+	NRVERSIONS[2]=0
+elif [[ ${TYPES[$MINOR]} = $TYPE ]]; then
+	NSVERSIONS[0]=${RVERSIONS[0]}
+	NSVERSIONS[1]=$((RVERSIONS[1] + 2))
+	NSVERSIONS[2]=0
+	NRVERSIONS[0]=${RVERSIONS[0]}
+	NRVERSIONS[1]=$((RVERSIONS[1] + 1))
+	NRVERSIONS[2]=0
+elif [[ ${TYPES[$PATCH]} = $TYPE ]]; then
+	NSVERSIONS[0]=${RVERSIONS[0]}
+	NSVERSIONS[1]=$((RVERSIONS[1] + 1))
+	NSVERSIONS[2]=0
+	NRVERSIONS[0]=${RVERSIONS[0]}
+	NRVERSIONS[1]=${RVERSIONS[1]}
+	NRVERSIONS[2]=$((RVERSIONS[2] + 1))
+fi
+
+OLD_RELEASE=&quot;${RVERSIONS[0]}.${RVERSIONS[1]}.${RVERSIONS[2]}&quot;
+NEXT_SNAPSHOT=&quot;${NSVERSIONS[0]}.${NSVERSIONS[1]}.${NSVERSIONS[2]}-SNAPSHOT&quot;
+NEXT_RELEASE=&quot;${NRVERSIONS[0]}.${NRVERSIONS[1]}.${NRVERSIONS[2]}&quot;
+TAG=&quot;spoon-core-$NEXT_RELEASE&quot;
+
+echo &quot;You&apos;ll create a $TYPE version $NEXT_RELEASE and the next snapshot will be $NEXT_SNAPSHOT&quot;
+
+# Release to Maven Central.
+
+mvn release:clean
+if [ &quot;$?&quot; -ne 0 ]; then
+    echo &quot;Can&apos;t clean the project for the release!&quot;
+    mvn release:rollback
+    if [ &quot;$?&quot; -ne 0 ]; then
+	    echo &quot;Can&apos;t rollback at the clean step!&quot;
+	fi
+    exit 1
+fi
+
+mvn release:prepare -DreleaseVersion=$NEXT_RELEASE -DdevelopmentVersion=$NEXT_SNAPSHOT -Dtag=$TAG
+if [ &quot;$?&quot; -ne 0 ]; then
+    echo &quot;Can&apos;t prepare the project for the release!&quot;
+    mvn release:rollback
+    if [ &quot;$?&quot; -ne 0 ]; then
+	    echo &quot;Can&apos;t rollback at the prepare step!&quot;
+	fi
+    exit 1
+fi
+
+mvn release:perform -Dusername=$USER_SERVER
+if [ &quot;$?&quot; -ne 0 ]; then
+    echo &quot;Can&apos;t perform the project for the release!&quot;
+    mvn release:rollback
+    if [ &quot;$?&quot; -ne 0 ]; then
+	    echo &quot;Can&apos;t rollback at the perform step!&quot;
+	fi
+    exit 1
+fi
+
+# Updates Jekyll documentation.
+
+sed -i -re &quot;s/^spoon_release: \&quot;[0-9]+.[0-9]+.[0-9]+\&quot;/spoon_release: \&quot;$NEXT_RELEASE\&quot;/;s/^sidebar_version: version [0-9]+.[0-9]+.[0-9]+/sidebar_version: version $NEXT_RELEASE/;s/^spoon_snapshot: \&quot;[0-9]+.[0-9]+.[0-9]+-SNAPSHOT\&quot;/spoon_snapshot: \&quot;$NEXT_SNAPSHOT\&quot;/&quot; doc/_config.yml
+if [ &quot;$?&quot; -ne 0 ]; then
+	echo &quot;Can&apos;t update new versions in the jekyll config file.&quot;
+	echo &quot;rollback at the previous state...&quot;
+	git checkout doc/_config.yml
+	exit 1
+fi
+
+DATE=$(date +&quot;%B %d, %Y: Spoon $NEXT_RELEASE is released.&quot;)
+DATE=&quot;$(tr &apos;[:lower:]&apos; &apos;[:upper:]&apos; &lt;&lt;&lt; ${DATE:0:1})${DATE:1}&quot;
+DATE=&quot;- $DATE&quot;
+awk -i inplace -v date=&quot;$DATE&quot; &apos;{print} /^&lt;!-- .* Marker comment. --&gt;$/ {print date}&apos; doc/doc_homepage.md
+if [ &quot;$?&quot; -ne 0 ]; then
+	echo &quot;Can&apos;t update news feed in the website.&quot;
+	echo &quot;rollback at the previous state...&quot;
+	git checkout doc/doc_homepage.md
+	exit 1
+fi
+
+# Updates Readme.
+
+sed -i -re &quot;s/&lt;version&gt;$OLD_RELEASE&lt;\/version&gt;/&lt;version&gt;$NEXT_RELEASE&lt;\/version&gt;/;s/&lt;version&gt;[0-9]+.[0-9]+.[0-9]+-SNAPSHOT&lt;\/version&gt;/&lt;version&gt;$NEXT_SNAPSHOT&lt;\/version&gt;/&quot; README.md
+if [ &quot;$?&quot; -ne 0 ]; then
+	echo &quot;Can&apos;t update new versions in the README file.&quot;
+	echo &quot;rollback at the previous state...&quot;
+	git checkout README.md
+	exit 1
+fi
+
+# Commit changes.
+
+echo &quot;What is changes?&quot;
+
+git diff
+git add . --all
+git commit -m &quot;docs(version): Updates documentation.&quot;
+if [[ ${TYPES[$PATCH]} = $TYPE ]]; then
+    git push origin stable
+else
+    git push origin master
+fi
+
+# Updates stable branch.
+
+if [[ ${TYPES[$PATCH]} != $TYPE ]]; then
+    git checkout master
+    git branch -D stable
+    git checkout -b stable
+    git push origin stable -f
+fi
+
+# Retrieves all commits and tag from GitHub repo to INRIA Forge.
+
+ssh -A $SERVER &quot;cd ${DESTINATION} &amp;&amp; git fetch origin master:master&quot;
+if [ &quot;$?&quot; -ne 0 ]; then
+    echo &quot;Error when you fetch sources from GitHub for the master branch!&quot;
+    exit 1
+fi
+
+ssh -A $SERVER &quot;cd ${DESTINATION} &amp;&amp; git fetch origin stable:stable&quot;
+if [ &quot;$?&quot; -ne 0 ]; then
+    echo &quot;Error when you fetch sources from GitHub for the stable branch!&quot;
+    exit 1
+fi
+
+ssh -A $SERVER &quot;cd ${DESTINATION} &amp;&amp; git fetch --tags&quot;
+if [ &quot;$?&quot; -ne 0 ]; then
+    echo &quot;Error when you fetch tags!&quot;
+    exit 1
+fi
+
+echo RELEASE=&quot;$NEXT_RELEASE&quot; &gt; target/variables.properties
+echo SNAPSHOT=&quot;$NEXT_SNAPSHOT&quot; &gt;&gt; target/variables.properties
+</command>
+    </hudson.tasks.Shell>
+    <EnvInjectBuilder plugin="envinject@1.92.1">
+      <info>
+        <propertiesFilePath>target/variables.properties</propertiesFilePath>
+      </info>
+    </EnvInjectBuilder>
+    <hudson.plugins.python.Python plugin="python@1.3">
+      <command>import json as json_converter
+import os
+import re
+import requests
+
+
+def _file_value(settings_filename, expected):
+    with open(settings_filename) as settings:
+        for line in settings:
+            key, value = line.split(&apos;:&apos;)[:2]
+            if key == expected:
+                return value
+    raise EOFError
+
+
+def _os_value(key, default_value=None):
+    try:
+        return os.environ[key]
+    except KeyError:
+        return default_value
+
+
+class GitHubRelease(object):
+    base_url = &apos;https://api.github.com/repos/INRIA/spoon&apos;
+
+    def __init__(self, settings_file):
+        super(GitHubRelease, self).__init__()
+        self.settings_file = settings_file
+
+    def _headers(self):
+        return {
+            &apos;Authorization&apos;: &apos;Token &apos; + _file_value(self.settings_file, &apos;TOKEN&apos;)
+        }
+
+    def get(self, url):
+        response = requests.get(self.base_url + url, headers=self._headers())
+        return json_converter.loads(response.text)
+
+    def post(self, url, data=None, json=None, headers=None):
+        if not json:
+            json = {}
+        if not headers:
+            headers = self._headers()
+        if not data:
+            data = {}
+        response = requests.post(self.base_url + url, data=data, json=json, headers=headers)
+        return json_converter.loads(response.text)
+
+    def delete(self, url):
+        requests.delete(self.base_url + url, headers=self._headers())
+
+    def _create(self, tag, name):
+        return self.post(&apos;/releases&apos;, json={
+            &apos;tag_name&apos;: tag,
+            &apos;name&apos;: name,
+            &apos;body&apos;: &apos;Changelog here.&apos;
+        })
+
+    def _upload_asset(self, upload_url, filename):
+        self.base_url = upload_url.replace(&apos;{?name,label}&apos;, &apos;?name={}&apos;.format(os.path.basename(filename)))
+        headers = self._headers()
+        headers[&apos;Content-Type&apos;] = &apos;application/zip&apos;
+        data = open(filename, &apos;r&apos;).read()
+        return self.post(&apos;&apos;, data=data, headers=headers)
+
+    def perform(self, tag, name, assets):
+        release = self._create(tag, name)
+        for asset in assets:
+            self._upload_asset(release[&apos;upload_url&apos;], asset[1])
+
+
+class GforgeRelease(object):
+    base_url = &apos;https://gforge.inria.fr&apos;
+    id_spoon = &apos;86&apos;
+    group_spoon = &apos;73&apos;
+    session = requests.Session()
+
+    def __init__(self, settings_file):
+        super(GforgeRelease, self).__init__()
+        self.settings_file = settings_file
+
+    def get(self, url, params=None):
+        if not params:
+            params = {}
+        return self.session.get(self.base_url + url, params=params)
+
+    def post(self, url, data=None, files=None):
+        if not data:
+            data = {}
+        if not files:
+            files = {}
+        return self.session.post(self.base_url + url, data=data, files=files)
+
+    def login(self, return_to=&apos;/&apos;):
+        self.session = requests.Session()
+        url = &apos;/plugins/authbuiltin/post-login.php&apos;
+        response = self.get(url)
+        form_key = re.search(&apos;&lt;input type=&quot;hidden&quot; name=&quot;form_key&quot; value=&quot;(.*)&quot; /&gt;&apos;, response.text)
+        payload = {
+            &apos;form_loginname&apos;: _file_value(self.settings_file, &apos;USERNAME&apos;),
+            &apos;form_pw&apos;: _file_value(self.settings_file, &apos;PASSWORD_FORGE&apos;),
+            &apos;return_to&apos;: return_to,
+            &apos;form_key&apos;: form_key.group(1),
+            &apos;login&apos;: &apos;Identification&apos;
+        }
+        return self.get(url, payload)
+
+    def _create(self, name, asset):
+        self.login(&apos;/frs/?view=qrs&amp;group_id={}&apos;.format(self.group_spoon))
+        url = &apos;/frs/?group_id={}&amp;action=addrelease&apos;.format(self.group_spoon)
+        payload = {
+            &apos;package_id&apos;: self.id_spoon,
+            &apos;release_name&apos;: re.search(&apos;Spoon ([0-9]+.[0-9]+.[0-9]+)&apos;, name).group(1),
+            &apos;type_id&apos;: asset[0],
+            &apos;processor_id&apos;: &apos;100&apos;,
+            &apos;release_changes&apos;: &apos;Changelog here.&apos;,
+            &apos;release_notes&apos;: &apos;&apos;,
+            &apos;preformatted&apos;: &apos;1&apos;,
+            &apos;submit&apos;: &apos;Create release&apos;
+        }
+        files = {
+            &apos;userfile&apos;: open(asset[1], &apos;r&apos;)
+        }
+        return self.post(url, data=payload, files=files)
+
+    def _upload_asset(self, release_id, asset):
+        self.login(
+            &apos;/frs/?view=editrelease&amp;group_id={}&amp;package_id={}&amp;release_id={}&apos;
+                .format(self.group_spoon, self.id_spoon, release_id))
+        url = &apos;/frs/?group_id={}&amp;package_id={}&amp;release_id={}&amp;action=addfile&apos; \
+            .format(self.group_spoon, self.id_spoon, release_id)
+        payload = {
+            &apos;type_id&apos;: asset[0],
+            &apos;processor_id&apos;: &apos;100&apos;,
+            &apos;submit&apos;: &apos;Add This File&apos;
+        }
+        files = {
+            &apos;userfile&apos;: open(asset[1], &apos;r&apos;)
+        }
+        return self.post(url, data=payload, files=files)
+
+    def perform(self, name, assets):
+        response = self._create(name, assets[0])
+        release_id = re.search(&apos;&lt;tr id=&quot;releaseid([0-9]+)&quot; class=&quot;bgcolor-white ff&quot;&gt;&apos;, response.text).group(1)
+        for asset in assets[1:]:
+            self._upload_asset(release_id, asset)
+
+
+type_ = _os_value(&apos;TYPE&apos;, &apos;minor&apos;)
+settings_file = _os_value(&apos;SETTINGS_PATH&apos;, &apos;/builds/resources/settings.txt&apos;)
+release = _os_value(&apos;RELEASE&apos;)
+
+tag_name = &apos;spoon-core-{}&apos;.format(release)
+name = &apos;Spoon {}&apos;.format(release)
+assets = [
+    (&apos;3000&apos;, &apos;target/{}.jar&apos;.format(tag_name)),
+    (&apos;5000&apos;, &apos;target/{}-jar-with-dependencies.jar&apos;.format(tag_name)),
+    (&apos;8200&apos;, &apos;target/{}-javadoc.jar&apos;.format(tag_name)),
+    (&apos;5000&apos;, &apos;target/{}-sources.jar&apos;.format(tag_name))
+]
+github = GitHubRelease(settings_file)
+github.perform(tag_name, name, assets)
+
+gforge = GforgeRelease(settings_file)
+gforge.perform(name, assets)
+</command>
+    </hudson.plugins.python.Python>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <com.cloudbees.jenkins.plugins.sshagent.SSHAgentBuildWrapper plugin="ssh-agent@1.7">
+      <credentialIds>
+        <string>e49880cb-4a37-4282-bcc3-1bdb5d882b70</string>
+      </credentialIds>
+      <ignoreMissing>false</ignoreMissing>
+    </com.cloudbees.jenkins.plugins.sshagent.SSHAgentBuildWrapper>
+  </buildWrappers>
+</project>
