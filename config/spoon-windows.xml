@@ -4,6 +4,10 @@
   <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
@@ -14,10 +18,6 @@
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.28">
-      <autoRebuild>false</autoRebuild>
-      <rebuildDisabled>false</rebuildDisabled>
-    </com.sonyericsson.rebuild.RebuildSettings>
   </properties>
   <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.1">
     <configVersion>2</configVersion>
@@ -59,7 +59,7 @@
     </hudson.tasks.Maven>
   </builders>
   <publishers>
-    <hudson.tasks.junit.JUnitResultArchiver plugin="junit@1.24">
+    <hudson.tasks.junit.JUnitResultArchiver plugin="junit@1.26.1">
       <testResults>target/surefire-reports/*.xml</testResults>
       <keepLongStdio>false</keepLongStdio>
       <healthScaleFactor>1.0</healthScaleFactor>
@@ -68,6 +68,14 @@
     <hudson.tasks.Fingerprinter>
       <targets>target/surefire-reports/*xml</targets>
     </hudson.tasks.Fingerprinter>
+    <org.jenkinsci.plugins.githubissues.GitHubIssueNotifier plugin="github-issues@1.2.4">
+      <issueTitle>tests fail with windows</issueTitle>
+      <issueBody>cannot be built on windows see https://ci.inria.fr/sos/job/spoon-windows/</issueBody>
+      <issueLabel></issueLabel>
+      <issueRepo>https://github.com/INRIA/spoon/</issueRepo>
+      <issueReopen>true</issueReopen>
+      <issueAppend>false</issueAppend>
+    </org.jenkinsci.plugins.githubissues.GitHubIssueNotifier>
     <hudson.tasks.Mailer plugin="mailer@1.21">
       <recipients>spoon-devel@lists.gforge.inria.fr</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
