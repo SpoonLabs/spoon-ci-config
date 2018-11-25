@@ -15,7 +15,7 @@ for name in tree.xpath('//job/name/text()'):
   url = "https://ci.inria.fr/sos/job/"+name+"/config.xml"
   print(name)
   doc = requests.get(url, auth=requests.auth.HTTPBasicAuth('martin.monperrus@inria.fr', login_keyring.get_password('jenkins', 'martin.monperrus@inria.fr'))).text
-  with open("config/"+name+".xml","w") as e:
+  with open("jobs/"+name+".xml","w") as e:
     e.write(doc)
 
 # getting the list of plugins
