@@ -44,11 +44,14 @@ mvn test</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.22">
-      <recipients>spoon-devel@lists.gforge.inria.fr</recipients>
-      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
-      <sendToIndividuals>false</sendToIndividuals>
-    </hudson.tasks.Mailer>
+    <org.jenkinsci.plugins.githubissues.GitHubIssueNotifier plugin="github-issues@1.2.4">
+      <issueTitle>regression in gumtree-spoon-ast-diff</issueTitle>
+      <issueBody>See https://ci.inria.fr/sos/job/gumtree-spoon-ast-diff/</issueBody>
+      <issueLabel>bug</issueLabel>
+      <issueRepo>https://github.com/INRIA/spoon/</issueRepo>
+      <issueReopen>true</issueReopen>
+      <issueAppend>false</issueAppend>
+    </org.jenkinsci.plugins.githubissues.GitHubIssueNotifier>
   </publishers>
   <buildWrappers>
     <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.36">
