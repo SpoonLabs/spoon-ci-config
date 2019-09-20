@@ -1,0 +1,91 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Push a comment on a pull-request of Spoon under the identity &quot;spoon-bot&quot;&#xd;
+&#xd;
+curl -F pull_request=3112 -F foo=@/tmp/revapi.md -v &quot;https://ci.inria.fr/sos/job/push-comment-github/buildWithParameters?token=hgzer87954&quot;&#xd;
+</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>pull_request</name>
+          <description></description>
+          <defaultValue>-1</defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.FileParameterDefinition>
+          <name>revapi_report.md</name>
+          <description></description>
+        </hudson.model.FileParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <authToken>hgzer87954</authToken>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>python3 --version
+pip3 install pygithub</command>
+    </hudson.tasks.Shell>
+    <hudson.plugins.python.Python plugin="python@1.3">
+      <command>#!/usr/bin/python3
+
+import os
+from github import *
+
+        
+os.environ[&apos;pull_request&apos;]
+
+repo_name=&quot;INRIA/spoon&quot;
+login = &quot;spoon-bot&quot;
+token = os.environ[&quot;GITHUB_AUTH_TOKEN&quot;]
+pr_id = int(os.environ[&quot;pull_request&quot;])
+
+print(str(pr_id))
+file_content=open(&apos;revapi_report.md&apos;).read()
+print(file_content)
+
+try:
+    gh = Github(login,token)
+    repo = gh.get_repo(repo_name,True)
+
+    pr = repo.get_pull(pr_id)
+    # get_issue_comments() must be called and not get_comments()
+    for comment in pr.get_issue_comments():
+        # login is &quot;spoon-bot&quot; by default
+        if comment.user.login == login:
+            print(&quot;deleted &quot;,comment)
+            comment.delete()
+    pr.create_issue_comment(file_content)
+    print(&quot;posted \n&quot;+file_content)
+except GithubException as e:
+    print(&quot;Error while creating the PR comment.&quot;)
+    print(e)
+    exit(1)</command>
+    </hudson.plugins.python.Python>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@1.20">
+      <bindings>
+        <org.jenkinsci.plugins.credentialsbinding.impl.StringBinding>
+          <credentialsId>a433ac15-0291-448c-8bda-69bec476d6e5</credentialsId>
+          <variable>GITHUB_AUTH_TOKEN</variable>
+        </org.jenkinsci.plugins.credentialsbinding.impl.StringBinding>
+      </bindings>
+    </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
+  </buildWrappers>
+</project>
