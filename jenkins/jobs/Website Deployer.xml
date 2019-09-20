@@ -4,14 +4,13 @@
   <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.29">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
   </properties>
   <scm class="hudson.scm.NullSCM"/>
-  <assignedNode>sos-builder01</assignedNode>
-  <canRoam>false</canRoam>
+  <canRoam>true</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
@@ -110,6 +109,15 @@ cd .. &amp;&amp; rm -rf $DIR
 </command>
     </hudson.tasks.Shell>
   </builders>
-  <publishers/>
+  <publishers>
+    <org.jenkinsci.plugins.githubissues.GitHubIssueNotifier plugin="github-issues@1.2.4">
+      <issueTitle></issueTitle>
+      <issueBody></issueBody>
+      <issueLabel></issueLabel>
+      <issueRepo></issueRepo>
+      <issueReopen>false</issueReopen>
+      <issueAppend>false</issueAppend>
+    </org.jenkinsci.plugins.githubissues.GitHubIssueNotifier>
+  </publishers>
   <buildWrappers/>
 </project>
