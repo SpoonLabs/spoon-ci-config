@@ -3,8 +3,7 @@
   <actions/>
   <description>Push a comment on a pull-request of Spoon under the identity &quot;spoon-bot&quot;&#xd;
 &#xd;
-curl -F pull_request=3112 -F foo=@/tmp/revapi.md -v &quot;https://ci.inria.fr/sos/job/push-comment-github/buildWithParameters?token=hgzer87954&quot;&#xd;
-</description>
+curl -F file0=@/tmp/revapi.md -F json=&apos;{&quot;parameter&quot;: [{&quot;name&quot;:&quot;revapi_report.md&quot;, &quot;file&quot;:&quot;file0&quot;},{&quot;name&quot;:&quot;pull_request&quot;,&quot;value&quot;:&quot;3112&quot;}]}&apos; -F pull_request=3112 -v &quot;https://ci.inria.fr/sos/job/push-comment-github/build?token=hgzer87954&quot;</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
@@ -45,6 +44,7 @@ pip3 install pygithub</command>
 
 import os
 from github import *
+import sys
 
         
 os.environ[&apos;pull_request&apos;]
@@ -52,6 +52,9 @@ os.environ[&apos;pull_request&apos;]
 repo_name=&quot;INRIA/spoon&quot;
 login = &quot;spoon-bot&quot;
 token = os.environ[&quot;GITHUB_AUTH_TOKEN&quot;]
+
+if not os.environ[&quot;pull_request&quot;].isdigit(): sys.exit(0)
+  
 pr_id = int(os.environ[&quot;pull_request&quot;])
 
 print(str(pr_id))
@@ -79,6 +82,12 @@ except GithubException as e:
   </builders>
   <publishers/>
   <buildWrappers>
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.37">
+      <deleteDirs>false</deleteDirs>
+      <cleanupParameter></cleanupParameter>
+      <externalDelete></externalDelete>
+      <disableDeferredWipeout>false</disableDeferredWipeout>
+    </hudson.plugins.ws__cleanup.PreBuildCleanup>
     <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@1.20">
       <bindings>
         <org.jenkinsci.plugins.credentialsbinding.impl.StringBinding>
