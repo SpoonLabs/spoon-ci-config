@@ -52,7 +52,7 @@ git clone $REPO $DIR
 cd $DIR_WEBSITE
 
 # Generate the website.
-LATESTVERSION=`curl -s &quot;http://search.maven.org/solrsearch/select?q=g:%22fr.inria.gforge.spoon%22+AND+a:%22spoon-core%22&quot; | jq .response.docs[0].latestVersion`
+LATESTVERSION=`curl -s &quot;http://search.maven.org/solrsearch/select?q=g:%22fr.inria.gforge.spoon%22+AND+a:%22spoon-core%22&amp;core=gav&quot; | jq -r &apos;.response.docs | map(select(.v | match(&quot;^[0-9.]+$&quot;)) | .v )| .[0]&apos;`
 sed -i -e &quot;s/^spoon_release: .*/spoon_release: $LATESTVERSION/&quot; _config.yml
 SNAPSHOTVERSION=`xmlstarlet sel -t -v /_:project/_:version ../pom.xml`
 sed -i -e &quot;s/^spoon_snapshot: .*/spoon_snapshot: \&quot;$SNAPSHOTVERSION\&quot;/&quot; _config.yml
