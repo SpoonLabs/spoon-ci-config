@@ -3,7 +3,7 @@
   <actions/>
   <description>Push a comment on a pull-request of Spoon under the identity &quot;spoon-bot&quot;&#xd;
 &#xd;
-curl -F file0=@/tmp/revapi.md -F json=&apos;{&quot;parameter&quot;: [{&quot;name&quot;:&quot;revapi_report.md&quot;, &quot;file&quot;:&quot;file0&quot;},{&quot;name&quot;:&quot;pull_request&quot;,&quot;value&quot;:&quot;3112&quot;}]}&apos; -F pull_request=3112 -v &quot;https://ci.inria.fr/sos/job/push-comment-github/build?token=hgzer87954&quot;</description>
+curl -F file0=@/tmp/revapi.md -F json=&apos;{&quot;parameter&quot;: [{&quot;name&quot;:&quot;revapi_report.md&quot;, &quot;file&quot;:&quot;file0&quot;},{&quot;name&quot;:&quot;pull_request&quot;,&quot;value&quot;:&quot;3112&quot;}]}&apos; -v &quot;https://ci.inria.fr/sos/job/push-comment-github/build?token=hgzer87954&quot;</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
