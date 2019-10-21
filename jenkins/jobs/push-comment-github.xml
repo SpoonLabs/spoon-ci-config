@@ -43,7 +43,7 @@ pip3 install pygithub</command>
       <command>#!/usr/bin/python3
 
 import os
-from github import *
+import github as gh
 import sys
 
         
