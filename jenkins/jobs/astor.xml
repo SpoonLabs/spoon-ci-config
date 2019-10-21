@@ -9,7 +9,7 @@
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.10.1">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.12.1">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
@@ -40,7 +40,8 @@
     <hudson.tasks.Shell>
       <command>./.travis_install.sh
 mvn clean
-mvn test -DskipTests</command>
+mvn versions:use-latest-versions -DallowSnapshots=true -Dincludes=fr.inria.gforge.spoon
+mvn test -Dtest=JGenProgEvolutionaryTest</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
