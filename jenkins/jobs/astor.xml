@@ -9,7 +9,7 @@
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.12.1">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.1.1">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
@@ -45,7 +45,12 @@ mvn test -Dtest=JGenProgEvolutionaryTest</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.plugins.ws__cleanup.WsCleanup plugin="ws-cleanup@0.37">
+    <hudson.tasks.Mailer plugin="mailer@1.30">
+      <recipients>martin.monperrus@gnieh.org matias.sebastian.martinez@gmail.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+    <hudson.plugins.ws__cleanup.WsCleanup plugin="ws-cleanup@0.38">
       <patterns class="empty-list"/>
       <deleteDirs>false</deleteDirs>
       <skipWhenFailed>false</skipWhenFailed>

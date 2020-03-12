@@ -50,6 +50,7 @@ git clone $REPO $DIR
 
 # Move working directory into temp folder.
 cd $DIR_WEBSITE
+cp ../README.md doc_homepage.md
 
 # Generate the website.
 LATESTVERSION=`curl -s &quot;http://search.maven.org/solrsearch/select?q=g:%22fr.inria.gforge.spoon%22+AND+a:%22spoon-core%22&amp;core=gav&quot; | jq -r &apos;.response.docs | map(select(.v | match(&quot;^[0-9.]+$&quot;)) | .v )| .[0]&apos;`
