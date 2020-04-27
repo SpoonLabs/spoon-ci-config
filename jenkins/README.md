@@ -1,10 +1,14 @@
 
-To download all jobs:
+Download all jobs
+------------------
 
     python dl-jenkins.py
 
-To restore a job [doc](https://support.cloudbees.com/hc/en-us/articles/218353308-How-to-update-job-config-files-using-the-REST-API-and-cURL-)
+Restore a job
+----------------
 
-    curl -X POST http://developer:developer@localhost:8080/job/test/config.xml --data-binary "@mymodifiedlocalconfig.xml"
+* Disable CRUMB /CRSF in jenkins, see https://stackoverflow.com/a/57869141
+* See [documentation](https://support.cloudbees.com/hc/en-us/articles/218353308-How-to-update-job-config-files-using-the-REST-API-and-cURL-)
 
-    curl -X POST -u martin.monperrus@inria.fr https://ci.inria.fr/sos/job/Website%20Deployer/config.xml --data-binary "@jobs/Website Deployer.xml"
+    JOB_TO_RESTORE=juliac
+    curl -X POST -u martin.monperrus@inria.fr "https://ci.inria.fr/sos/job/$JOB_TO_RESTORE/config.xml" --data-binary "@jobs/$JOB_TO_RESTORE.xml"
