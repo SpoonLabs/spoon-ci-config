@@ -1,7 +1,6 @@
-<?xml version='1.1' encoding='UTF-8'?>
-<project>
+<?xml version="1.1" encoding="UTF-8"?><project>
   <actions/>
-  <description></description>
+  <description/>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
@@ -29,18 +28,18 @@
 # To test the site locally before deploying run `jekyll serve`
 # in the website branch.
 #
-# Copied in the config of job &quot;website deployer&quot; on Jenkins
+# Copied in the config of job "website deployer" on Jenkins
 
-REPO=&quot;https://github.com/INRIA/spoon.git&quot;
+REPO="https://github.com/INRIA/spoon.git"
 DIR=temp-spoon-clone
 DIR_WEBSITE=${DIR}/doc/
 
-USER_SERVER=&quot;spoon-bot&quot;
-WEBSITE_SERVER=&quot;${USER_SERVER}@scm.gforge.inria.fr&quot;
-SOURCE=&quot;_site/&quot;
-HOST_DESTINATION=&quot;/home/groups/spoon/&quot;
-FOLDER_DESTINATION=&quot;htdocs&quot;
-DESTINATION=&quot;${HOST_DESTINATION}${FOLDER_DESTINATION}/&quot;
+USER_SERVER="spoon-bot"
+WEBSITE_SERVER="${USER_SERVER}@scm.gforge.inria.fr"
+SOURCE="_site/"
+HOST_DESTINATION="/home/groups/spoon/"
+FOLDER_DESTINATION="htdocs"
+DESTINATION="${HOST_DESTINATION}${FOLDER_DESTINATION}/"
 
 # Delete any existing previous temps spoon clone.
 rm -rf $DIR
@@ -53,46 +52,46 @@ cd $DIR_WEBSITE
 cp ../README.md doc_homepage.md
 
 # Generate the website.
-LATESTVERSION=`curl -s &quot;http://search.maven.org/solrsearch/select?q=g:%22fr.inria.gforge.spoon%22+AND+a:%22spoon-core%22&amp;core=gav&quot; | jq -r &apos;.response.docs | map(select(.v | match(&quot;^[0-9.]+$&quot;)) | .v )| .[0]&apos;`
-sed -i -e &quot;s/^spoon_release: .*/spoon_release: $LATESTVERSION/&quot; _config.yml
+LATESTVERSION=`curl -s "http://search.maven.org/solrsearch/select?q=g:%22fr.inria.gforge.spoon%22+AND+a:%22spoon-core%22&amp;core=gav" | jq -r '.response.docs | map(select(.v | match("^[0-9.]+$")) | .v )| .[0]'`
+sed -i -e "s/^spoon_release: .*/spoon_release: $LATESTVERSION/" _config.yml
 SNAPSHOTVERSION=`xmlstarlet sel -t -v /_:project/_:version ../pom.xml`
-sed -i -e &quot;s/^spoon_snapshot: .*/spoon_snapshot: \&quot;$SNAPSHOTVERSION\&quot;/&quot; _config.yml
+sed -i -e "s/^spoon_snapshot: .*/spoon_snapshot: \"$SNAPSHOTVERSION\"/" _config.yml
 jekyll build
-if [ &quot;$?&quot; -ne 0 ]; then
-    echo &quot;Jekyll cannot build your site!&quot;
+if [ "$?" -ne 0 ]; then
+    echo "Jekyll cannot build your site!"
     exit 1
 fi
 
 # moving repositories before backup
-ssh $WEBSITE_SERVER &quot;mv ${DESTINATION}/repositories ${HOST_DESTINATION}&quot;
+ssh $WEBSITE_SERVER "mv ${DESTINATION}/repositories ${HOST_DESTINATION}"
 
 # Back up the old website and create the folder for the new one.
 TIMESTAMP=$(date +%s)
-BACKUP_DESTINATION=&quot;${HOST_DESTINATION}${FOLDER_DESTINATION}-${TIMESTAMP}&quot;
-ssh $WEBSITE_SERVER &quot;mv ${DESTINATION} ${BACKUP_DESTINATION}&quot;
-if [ &quot;$?&quot; -ne 0 ]; then
-    echo &quot;Error when you tried to back up the old website!&quot;
+BACKUP_DESTINATION="${HOST_DESTINATION}${FOLDER_DESTINATION}-${TIMESTAMP}"
+ssh $WEBSITE_SERVER "mv ${DESTINATION} ${BACKUP_DESTINATION}"
+if [ "$?" -ne 0 ]; then
+    echo "Error when you tried to back up the old website!"
     exit 1
 fi
 
-ssh $WEBSITE_SERVER &quot;mkdir -p ${DESTINATION}&quot;
-if [ &quot;$?&quot; -ne 0 ]; then
-    echo &quot;Error when you tried to create the folder of the new website!&quot;
+ssh $WEBSITE_SERVER "mkdir -p ${DESTINATION}"
+if [ "$?" -ne 0 ]; then
+    echo "Error when you tried to create the folder of the new website!"
     exit 1
 fi
 
 # Copy the website on the server.
 scp -r $SOURCE* $WEBSITE_SERVER:$DESTINATION
-if [ &quot;$?&quot; -ne 0 ]; then
-    echo &quot;Error when you tried to copy the new version on the server!&quot;
+if [ "$?" -ne 0 ]; then
+    echo "Error when you tried to copy the new version on the server!"
     exit 1
 fi
 
 # moving repositories before backup
-ssh $WEBSITE_SERVER &quot;mv ${HOST_DESTINATION}/repositories ${DESTINATION}&quot;
+ssh $WEBSITE_SERVER "mv ${HOST_DESTINATION}/repositories ${DESTINATION}"
 
 # Remove backups older than 3 days.
-ssh $WEBSITE_SERVER &quot;find ${HOST_DESTINATION}${FOLDER_DESTINATION}-* -mtime +3 -type d -exec rm -rf {} \;&quot;
+ssh $WEBSITE_SERVER "find ${HOST_DESTINATION}${FOLDER_DESTINATION}-* -mtime +3 -type d -exec rm -rf {} \;"
 
 # Come back at the root of the temp project.
 cd ..
@@ -100,8 +99,8 @@ cd ..
 # Generate maven site and deploy it.
 # coming back into the main folder with pom.xml
 mvn site site:deploy
-if [ &quot;$?&quot; -ne 0 ]; then
-    echo &quot;Error when you tried to build or deploy maven site!&quot;
+if [ "$?" -ne 0 ]; then
+    echo "Error when you tried to build or deploy maven site!"
     exit 1
 fi
 
@@ -112,10 +111,10 @@ cd .. &amp;&amp; rm -rf $DIR
   </builders>
   <publishers>
     <org.jenkinsci.plugins.githubissues.GitHubIssueNotifier plugin="github-issues@1.2.4">
-      <issueTitle></issueTitle>
-      <issueBody></issueBody>
-      <issueLabel></issueLabel>
-      <issueRepo></issueRepo>
+      <issueTitle/>
+      <issueBody/>
+      <issueLabel/>
+      <issueRepo/>
       <issueReopen>false</issueReopen>
       <issueAppend>false</issueAppend>
     </org.jenkinsci.plugins.githubissues.GitHubIssueNotifier>
