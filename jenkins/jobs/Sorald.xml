@@ -4,16 +4,16 @@
   <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.32">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.4.5">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.8.1">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <url>https://github.com/square/javapoet.git</url>
+        <url>https://github.com/SpoonLabs/sorald</url>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
@@ -22,14 +22,17 @@
       </hudson.plugins.git.BranchSpec>
     </branches>
     <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
-    <submoduleCfg class="list"/>
-    <extensions/>
+    <submoduleCfg class="empty-list"/>
+    <extensions>
+      <hudson.plugins.git.extensions.impl.WipeWorkspace/>
+    </extensions>
   </scm>
-  <canRoam>true</canRoam>
+  <assignedNode>java11</assignedNode>
+  <canRoam>false</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <jdk>JDK 8.0.151</jdk>
+  <jdk>JDK 11 (note: JDK 11 must preinstalled on agent, this only sets it as the default)</jdk>
   <triggers>
     <hudson.triggers.TimerTrigger>
       <spec>@daily</spec>
@@ -38,24 +41,24 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>curl &quot;$SPOON_BUILD_SCRIPT_URL&quot; | bash</command>
+      <command>python3 -c &quot;$(curl $INJECT_SNAPSHOT_SCRIPT_URL)&quot;
+mvn clean test</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
-  <publishers>
-    <hudson.tasks.ArtifactArchiver>
-      <artifacts>target/spoon-reports/*</artifacts>
-      <allowEmptyArchive>false</allowEmptyArchive>
-      <onlyIfSuccessful>false</onlyIfSuccessful>
-      <fingerprint>false</fingerprint>
-      <defaultExcludes>true</defaultExcludes>
-      <caseSensitive>true</caseSensitive>
-      <followSymlinks>true</followSymlinks>
-    </hudson.tasks.ArtifactArchiver>
-    <hudson.plugins.summary__report.ACIPluginPublisher plugin="summary_report@1.15">
-      <name>target/spoon-reports/result-spoon.xml</name>
-      <shownOnProjectPage>true</shownOnProjectPage>
-    </hudson.plugins.summary__report.ACIPluginPublisher>
-  </publishers>
-  <buildWrappers/>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.39">
+      <patterns>
+        <hudson.plugins.ws__cleanup.Pattern>
+          <pattern>/tmp/sorald-test-workspace*</pattern>
+          <type>INCLUDE</type>
+        </hudson.plugins.ws__cleanup.Pattern>
+      </patterns>
+      <deleteDirs>true</deleteDirs>
+      <cleanupParameter></cleanupParameter>
+      <externalDelete></externalDelete>
+      <disableDeferredWipeout>false</disableDeferredWipeout>
+    </hudson.plugins.ws__cleanup.PreBuildCleanup>
+  </buildWrappers>
 </project>
