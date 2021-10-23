@@ -9,7 +9,7 @@
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.3.0">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.4.5">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
@@ -41,12 +41,13 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>mvn clean versions:use-latest-versions -DallowSnapshots=true -Dincludes=fr.inria.gforge.spoon
+      <command>python3 -c &quot;$(curl $INJECT_SNAPSHOT_SCRIPT_URL)&quot;
 mvn clean test</command>
+      <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.32">
+    <hudson.tasks.Mailer plugin="mailer@1.32.1">
       <recipients>spoon-devel@lists.gforge.inria.fr</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
