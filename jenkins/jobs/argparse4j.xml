@@ -56,14 +56,6 @@
       <name>target/spoon-reports/result-spoon.xml</name>
       <shownOnProjectPage>true</shownOnProjectPage>
     </hudson.plugins.summary__report.ACIPluginPublisher>
-    <org.jenkinsci.plugins.githubissues.GitHubIssueNotifier plugin="github-issues@1.2.4">
-      <issueTitle>regression caught on Jenkins SOS</issueTitle>
-      <issueBody>https://ci.inria.fr/sos/</issueBody>
-      <issueLabel>bug</issueLabel>
-      <issueRepo>https://github.com/INRIA/spoon/</issueRepo>
-      <issueReopen>true</issueReopen>
-      <issueAppend>true</issueAppend>
-    </org.jenkinsci.plugins.githubissues.GitHubIssueNotifier>
   </publishers>
   <buildWrappers>
     <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.39">
