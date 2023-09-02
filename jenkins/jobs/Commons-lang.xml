@@ -5,12 +5,12 @@
 the test suite is local dependent and sos-builder2 has the right one</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.32">
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@320.v5a_0933a_e7d61">
       <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.9.0">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@5.2.0">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
@@ -53,13 +53,9 @@ the test suite is local dependent and sos-builder2 has the right one</descriptio
       <caseSensitive>true</caseSensitive>
       <followSymlinks>true</followSymlinks>
     </hudson.tasks.ArtifactArchiver>
-    <hudson.plugins.summary__report.ACIPluginPublisher plugin="summary_report@1.15">
-      <name>target/spoon-reports/result-spoon.xml</name>
-      <shownOnProjectPage>true</shownOnProjectPage>
-    </hudson.plugins.summary__report.ACIPluginPublisher>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.39">
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.45">
       <deleteDirs>false</deleteDirs>
       <cleanupParameter></cleanupParameter>
       <externalDelete></externalDelete>
