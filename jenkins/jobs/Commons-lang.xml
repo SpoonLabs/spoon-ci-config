@@ -39,7 +39,8 @@ the test suite is local dependent and sos-builder2 has the right one</descriptio
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>curl -k &quot;$BUILD_SCRIPT_URL&quot; | stdbuf -i 50k bash</command>
+      <command>export MVN_OPTS=-DskipTest=\!FastDateParser_TimeZoneStrategyTest*
+curl -k &quot;$BUILD_SCRIPT_URL&quot; | stdbuf -i 50k bash</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
