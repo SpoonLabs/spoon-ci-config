@@ -47,7 +47,9 @@ python3 -c &quot;$(curl $INJECT_SNAPSHOT_SCRIPT_URL)&quot;
 # https://maven.apache.org/surefire/maven-surefire-plugin/examples/single-test.html#Multiple_Formats_in_One
 #mvn clean test -Dtest=&apos;*Test,Test*,*Tests,*TestCase,!**/GradleAutomaticBuilderTest,!**/GradleAutomaticBuilderWithDescartesTest&apos;
 find dspot/src/test/java -name &quot;*Gradle*.java&quot; | xargs rm
-mvn clean test</command>
+cd dspot
+mvn clean test
+mvn dependency:tree</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
