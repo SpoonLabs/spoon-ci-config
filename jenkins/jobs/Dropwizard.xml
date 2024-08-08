@@ -42,8 +42,9 @@
       <configuredLocalRules/>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>export MVN_OPTS=&quot;-Dfindbugs.skip=true&quot;
-curl &quot;$BUILD_SCRIPT_URL&quot; | stdbuf -i 50k bash</command>
+      <command>echo will not fix that project
+#export MVN_OPTS=&quot;-Dfindbugs.skip=true&quot;
+#curl &quot;$BUILD_SCRIPT_URL&quot; | stdbuf -i 50k bash</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>

@@ -42,20 +42,24 @@
       <configuredLocalRules/>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>cd test-projects
+      <command># preparing the tests projects
+cd test-projects
 mvn test -DskipTests 
 cd ../nopol
 python3 -c &quot;$(curl $INJECT_SNAPSHOT_SCRIPT_URL)&quot;
 mvn -U dependency:resolve
+# simulating github CI
+export GITHUB_HEAD_REF=true
 mvn package</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.junit.JUnitResultArchiver plugin="junit@1265.v65b_14fa_f12f0">
+    <hudson.tasks.junit.JUnitResultArchiver plugin="junit@1280.v310a_78b_9a_1e0">
       <testResults>nopol/target/surefire-reports/*.xml</testResults>
       <stdioRetention>NONE</stdioRetention>
       <keepProperties>false</keepProperties>
+      <keepTestNames>false</keepTestNames>
       <healthScaleFactor>1.0</healthScaleFactor>
       <allowEmptyResults>false</allowEmptyResults>
       <skipPublishingChecks>false</skipPublishingChecks>
@@ -90,7 +94,7 @@ mvn package</command>
       <externalDelete></externalDelete>
       <disableDeferredWipeout>false</disableDeferredWipeout>
     </hudson.plugins.ws__cleanup.PreBuildCleanup>
-    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.32">
+    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.33">
       <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
         <timeoutMinutes>60</timeoutMinutes>
       </strategy>

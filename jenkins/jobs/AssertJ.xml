@@ -38,24 +38,12 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>curl -k &quot;$BUILD_SCRIPT_URL&quot; | stdbuf -i 50k bash</command>
+      <command>echo seriously, project AssertJ is too old and too big
+#curl -k &quot;$BUILD_SCRIPT_URL&quot; | stdbuf -i 50k bash</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.ArtifactArchiver>
-      <artifacts>target/spoon-reports/*</artifacts>
-      <allowEmptyArchive>false</allowEmptyArchive>
-      <onlyIfSuccessful>false</onlyIfSuccessful>
-      <fingerprint>false</fingerprint>
-      <defaultExcludes>true</defaultExcludes>
-      <caseSensitive>true</caseSensitive>
-      <followSymlinks>true</followSymlinks>
-    </hudson.tasks.ArtifactArchiver>
-    <hudson.plugins.summary__report.ACIPluginPublisher plugin="summary_report@1.15">
-      <name>target/spoon-reports/result-spoon.xml</name>
-      <shownOnProjectPage>true</shownOnProjectPage>
-    </hudson.plugins.summary__report.ACIPluginPublisher>
     <hudson.tasks.Mailer plugin="mailer@472.vf7c289a_4b_420">
       <recipients>spoon-devel@lists.gforge.inria.fr</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
